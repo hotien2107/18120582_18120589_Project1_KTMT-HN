@@ -3,18 +3,20 @@
 QInt::QInt()
 {
 }
-QInt::QInt(unsigned int Data[4])
+
+QInt::QInt(uint32_t Data[4])
 {
 	for (int i = 0; i < NUM_BLOCK; i++)
 	{
 		this->data[i] = Data[i];
 	}
 }
+
 QInt::~QInt()
 {
 }
 
-void QInt::setData(unsigned int Data[4])
+void QInt::setData(uint32_t Data[4])
 {
 	for (int i = 0; i < NUM_BLOCK; i++)
 	{
@@ -22,7 +24,7 @@ void QInt::setData(unsigned int Data[4])
 	}
 }
 
-void QInt::XuatData()
+void QInt::PrintData()
 {
 	for (int i = 0; i < NUM_BLOCK; i++)
 	{
@@ -30,12 +32,28 @@ void QInt::XuatData()
 	}
 }
 
+char QInt::MSB(const string& Bin)
+{
+	if (Bin.length() < MAX_SIZE)
+		return '0';
+	return '1';
+}
+
+bool QInt::OverFlowBin(const string& Bin)
+{
+	string str = Bin;
+	str = StandarString(str);
+	if (str.length() > MAX_SIZE)
+		return false;
+	return true;
+}
+
 string QInt::QIntToBin()
 {
 	string str;
 	for (int i = 3; i >= 0; i--)
 	{
-		int temp = this->data[i];
+		uint32_t temp = this->data[i];
 		for (int j = 0; temp > 0; j++)
 		{
 			char k = temp % 2;
@@ -44,6 +62,16 @@ string QInt::QIntToBin()
 		}
 	}
 	return str;
+}
+
+string QInt::StandarString(const string& str)
+{
+	string str1 = str;
+	while (str1[0] == '0')
+	{
+		str1.erase(0, 1);
+	}
+	return str1;
 }
 
 QInt QInt::BinToQInt(const string& str)
@@ -77,98 +105,161 @@ QInt QInt::BinToQInt(const string& str)
 			}
 		}
 	}
-	return qint;
+	for (int i = 0; i < NUM_BLOCK; i++)
+	{
+		this->data[i] = qint.data[i];
+	}
+	return *this;
+}
+
+int multiply(int res[], int res_size)
+{
+
+	// Initialize carry 
+	int carry = 0;
+
+	// One by one multiply n with 
+	// individual digits of res[] 
+	for (int i = 0; i < res_size; i++)
+	{
+		int prod = res[i] * 2 + carry;
+
+		// Store last digit of 
+		// 'prod' in res[] 
+		res[i] = prod % 10;
+
+		// Put rest in carry 
+		carry = prod / 10;
+	}
+
+	// Put carry in res and 
+	// increase result size 
+	while (carry) {
+		res[res_size] = carry % 10;
+		carry = carry / 10;
+		res_size++;
+	}
+	return res_size;
 }
 
 string QInt::Two_Pow_n(int n)
 {
-	string str;
-	int i, j;
-	int blen = n / 32 + 1;
-	int dlen = n / 29 + 1;
-	uint32_t* bin = new uint32_t[blen];
-	uint32_t* dec = new uint32_t[dlen];
-	uint64_t num;
-
-	for (i = 0; i < blen; i++)
-		bin[i] = 0;
-	bin[n / 32] = (uint32_t)1 << (n % 32);
-
-	for (j = 0; blen > 0; ) {
-		for (num = 0, i = blen; i-- > 0;) {
-			num = (num << 32) | bin[i];
-			bin[i] = num / 1000000000;
-			num = num % 1000000000;
-		}
-		dec[j++] = (uint32_t)num;
-		while (blen > 0 && bin[blen - 1] == 0)
-			blen--;
-	}
-	while (j > 0)
+	string pow;
+	//printing value "1" for power = 0 
+	if (n == 0)
 	{
-		j--;
-		stringstream ss;
-		ss << dec[j];
-		string temp = ss.str();
-		for (int k = 0; k < temp.length(); k++)
-		{
-			str.push_back(temp[k]);
-		}
+		pow.push_back('1');
+		return pow;
 	}
-	return str;
+
+
+	int res[100000];
+	int res_size = 0;
+	int temp = 2;
+
+	// Initialize result 
+	while (temp != 0) {
+		res[res_size++] = temp % 10;
+		temp = temp / 10;
+	}
+
+	// Multiply x n times 
+	// (x^n = x*x*x....n times) 
+	for (int i = 2; i <= n; i++)
+		res_size = multiply(res, res_size);
+
+	for (int i = res_size - 1; i >= 0; i--)
+	{
+		char temp = (char)res[i] + '0';
+		pow.push_back(temp);
+	}
+	return pow;
 }
 
 string QInt::Add(string str1, string str2)
 {
-	int flat = 0;
+	string str;
+
 	if (str1[0] == '-' && str2[0] == '-')
-		flat = 1;
-	
-	if (str1[0] == '-' && str2[0] != '-')
 	{
-		str1.erase(0);
+		str1.erase(str1.begin());
+		str2.erase(str2.begin());
+
+		if (str1.length() > str2.length())
+			swap(str1, str2);
+
+		int n1 = str1.length(), n2 = str2.length();
+
+		reverse(str1.begin(), str1.end());
+		reverse(str2.begin(), str2.end());
+
+		int carry = 0;
+		for (int i = 0; i < n1; i++)
+		{
+
+			int sum = ((str1[i] - '0') + (str2[i] - '0') + carry);
+			str.push_back(sum % 10 + '0');
+
+			carry = sum / 10;
+		}
+
+		for (int i = n1; i < n2; i++)
+		{
+			int sum = ((str2[i] - '0') + carry);
+			str.push_back(sum % 10 + '0');
+			carry = sum / 10;
+		}
+
+		if (carry)
+			str.push_back(carry + '0');
+
+		reverse(str.begin(), str.end());
+
+		str.insert(str.begin(), '-');
+	}
+	else if (str1[0] == '-' && str2[0] != '-')
+	{
+		str1.erase(str1.begin());
 		return Subtract(str2, str1);
 	}
-	if (str1[0] != '-' && str2[0] == '-')
+	else if (str1[0] != '-' && str2[0] == '-')
 	{
-		str2.erase(0);
+		str2.erase(str2.begin());
 		return Subtract(str1, str2);
 	}
-	if (str1.length() > str2.length())
-		swap(str1, str2);
-
-	string str = "";
-
-	int n1 = str1.length(), n2 = str2.length();
-
-	reverse(str1.begin(), str1.end());
-	reverse(str2.begin(), str2.end());
-
-	int carry = 0;
-	for (int i = 0; i < n1; i++)
+	else 	if (str1[0] != '-' && str2[0] != '-')
 	{
+		if (str1.length() > str2.length())
+			swap(str1, str2);
 
-		int sum = ((str1[i] - '0') + (str2[i] - '0') + carry);
-		str.push_back(sum % 10 + '0');
+		int n1 = str1.length(), n2 = str2.length();
 
-		carry = sum / 10;
+		reverse(str1.begin(), str1.end());
+		reverse(str2.begin(), str2.end());
+
+		int carry = 0;
+		for (int i = 0; i < n1; i++)
+		{
+
+			int sum = ((str1[i] - '0') + (str2[i] - '0') + carry);
+			str.push_back(sum % 10 + '0');
+
+			carry = sum / 10;
+		}
+
+		for (int i = n1; i < n2; i++)
+		{
+			int sum = ((str2[i] - '0') + carry);
+			str.push_back(sum % 10 + '0');
+			carry = sum / 10;
+		}
+
+		if (carry)
+			str.push_back(carry + '0');
+
+		reverse(str.begin(), str.end());
 	}
-
-	for (int i = n1; i < n2; i++)
-	{
-		int sum = ((str2[i] - '0') + carry);
-		str.push_back(sum % 10 + '0');
-		carry = sum / 10;
-	}
-
-	if (carry)
-		str.push_back(carry + '0');
-
-	reverse(str.begin(), str.end());
-
-	if (flat == 1)
-		str.insert(str.begin(), '-');
-
+	str = StandarString(str);
 	return str;
 }
 
@@ -236,32 +327,472 @@ string QInt::Subtract(string str1, string str2)
 	}
 
 	reverse(str.begin(), str.end());
+	str = StandarString(str);
 	if (flat == 1)
 	{
 		str.insert(str.begin(), '-');
 	}
-
 	return str;
 }
 
 string QInt::BinToDec(const string& str)
 {
-	string Dec = "";
+	string Dec;
 	string str1 = str;
 	int k = 0;
 	for (int i = str1.length() - 1; i >= 0; i--)
 	{
+		if (k == 127)
+		{
+			Dec = Subtract(Dec, Two_Pow_n(k));
+			return Dec;
+		}
 		if (str1[i] == '1')
 		{
 			Dec = Add(Dec, Two_Pow_n(k));
-		}
-		if (k == 127)
-		{
-			string temp = '-' + Two_Pow_n(k);
-			Dec = Add(Dec, temp);
 		}
 		k++;
 	}
 	return Dec;
 }
 
+string QInt::DivideTwo(string number)
+{
+	string ans;
+
+	int idx = 0;
+	int temp = number[idx] - '0';
+	while (temp < 2)
+		temp = temp * 10 + (number[++idx] - '0');
+
+	while (number.size() > idx)
+	{
+		ans += (temp / 2) + '0';
+
+		temp = (temp % 2) * 10 + number[++idx] - '0';
+	}
+
+	if (ans.length() == 0)
+		return "0";
+
+	return ans;
+}
+
+string QInt::TwoComplement(const string& str)
+{
+	string str1 = str;
+	while (str1.length() < MAX_SIZE)
+	{
+		str1.insert(str1.begin(), '0');
+	}
+	int i = str1.length() - 1;
+	int flat = 0;
+	while (i >= 0)
+	{
+		if (flat == 0 && str1[i] == '1')
+		{
+			flat = 1;
+			i--;
+		}
+		else if (flat == 1)
+		{
+			if (str1[i] == '1')
+				str1[i] = '0';
+			else
+				str1[i] = '1';
+			i--;
+		}
+		else
+			i--;
+	}
+	return str1;
+}
+
+string QInt::DecToBin(const string& str)
+{
+	string Bin;
+	string str1 = str;
+	if (str1[0] != '-')
+	{
+		while (str1.length() > 0)
+		{
+			if (str1.length() == 1 && str1[0] == '1')
+			{
+				Bin.insert(Bin.begin(), '1');
+				Bin = StandarString(Bin);
+				return Bin;
+			}
+			else
+			{
+				int temp = (int)str1[str1.length() - 1] - '0';
+				if (temp % 2 == 1)
+				{
+					Bin.insert(Bin.begin(), '1');
+					str1 = DivideTwo(str1);
+				}
+				else
+				{
+					Bin.insert(Bin.begin(), '0');
+					str1 = DivideTwo(str1);
+				}
+			}
+		}
+	}
+	else
+	{
+		str1.erase(str1.begin());
+
+		while (str1.length() > 0)
+		{
+			if (str1.length() == 1 && str1[0] == '1')
+			{
+				Bin.insert(Bin.begin(), '1');
+				Bin = TwoComplement(Bin);
+				Bin = StandarString(Bin);
+				return Bin;
+			}
+			else
+			{
+				int temp = (int)str1[str1.length() - 1] - '0';
+				if (temp % 2 == 1)
+				{
+					Bin.insert(Bin.begin(), '1');
+					str1 = DivideTwo(str1);
+				}
+				else
+				{
+					Bin.insert(Bin.begin(), '0');
+					str1 = DivideTwo(str1);
+				}
+			}
+		}
+	}
+}
+
+string QInt::BinToHex(const string& str)
+{
+	string Hex;
+	string str1 = str;
+	while (str1.length() % 4 != 0)
+	{
+		str1.insert(str1.begin(), '0');
+	}
+
+	while (str1.length() > 0)
+	{
+		string temp;
+		for (int i = 0; i < 4; i++)
+		{
+			temp.insert(temp.begin(), str1[str1.length() - 1]);
+			str1.pop_back();
+		}
+
+		if (temp == "0000")
+			Hex.insert(Hex.begin(), '0');
+		else if (temp == "0001")
+			Hex.insert(Hex.begin(), '1');
+		else if (temp == "0010")
+			Hex.insert(Hex.begin(), '2');
+		else if (temp == "0011")
+			Hex.insert(Hex.begin(), '3');
+		else if (temp == "0100")
+			Hex.insert(Hex.begin(), '4');
+		else if (temp == "0101")
+			Hex.insert(Hex.begin(), '5');
+		else if (temp == "0110")
+			Hex.insert(Hex.begin(), '6');
+		else if (temp == "0111")
+			Hex.insert(Hex.begin(), '7');
+		else if (temp == "1000")
+			Hex.insert(Hex.begin(), '8');
+		else if (temp == "1001")
+			Hex.insert(Hex.begin(), '9');
+		else if (temp == "1010")
+			Hex.insert(Hex.begin(), 'A');
+		else if (temp == "1011")
+			Hex.insert(Hex.begin(), 'B');
+		else if (temp == "1100")
+			Hex.insert(Hex.begin(), 'C');
+		else if (temp == "1101")
+			Hex.insert(Hex.begin(), 'D');
+		else if (temp == "1110")
+			Hex.insert(Hex.begin(), 'E');
+		else if (temp == "1111")
+			Hex.insert(Hex.begin(), 'F');
+	}
+	return Hex;
+}
+
+string QInt::HexToBin(const string& str)
+{
+	string Bin;
+	for (int i = 0; i < str.length(); i++)
+	{
+		if (str[i] == '0')
+			Bin = Bin + "0000";
+		else if (str[i] == '1')
+			Bin = Bin + "0001";
+		else if (str[i] == '2')
+			Bin = Bin + "0010";
+		else if (str[i] == '3')
+			Bin = Bin + "0011";
+		else if (str[i] == '4')
+			Bin = Bin + "0100";
+		else if (str[i] == '5')
+			Bin = Bin + "0101";
+		else if (str[i] == '6')
+			Bin = Bin + "0110";
+		else if (str[i] == '7')
+			Bin = Bin + "0111";
+		else if (str[i] == '8')
+			Bin = Bin + "1000";
+		else if (str[i] == '9')
+			Bin = Bin + "1001";
+		else if (str[i] == 'A')
+			Bin = Bin + "1010";
+		else if (str[i] == 'B')
+			Bin = Bin + "1011";
+		else if (str[i] == 'C')
+			Bin = Bin + "1100";
+		else if (str[i] == 'D')
+			Bin = Bin + "1101";
+		else if (str[i] == 'E')
+			Bin = Bin + "1110";
+		else if (str[i] == 'F')
+			Bin = Bin + "1111";
+	}
+	Bin = StandarString(Bin);
+	return Bin;
+}
+
+string QInt::DecToHex(const string& str)
+{
+	return BinToHex(DecToBin(str));
+}
+
+string QInt::HexToDec(const string& str)
+{
+	return BinToDec(HexToBin(str));
+}
+
+string QInt::SHL(const string& bin, int x)
+{
+	string str = bin;
+	str.erase(0, x);
+	for (int i = 0; i < x; ++i)
+		str += '0';
+	str = StandarString(str);
+	return str;
+}
+
+string QInt::SAR(const string& bin, int x)
+{
+	string str = bin;
+
+	if (str[0] == '0')
+	{
+		str.erase(str.length() - x, str.length());
+		for (int i = 0; i < x; ++i)
+			str = '0' + str;
+	}
+	else
+	{
+		str.erase(str.length() - x, str.length());
+		for (int i = 0; i < x; ++i)
+			str = '1' + str;
+	}
+	str = StandarString(str);
+	return str;
+}
+
+string QInt::ROL(string bin)
+{
+
+	bin = bin + bin[0];
+	bin.erase(0, 1);
+	return bin;
+}
+
+string QInt::ROR(string bin)
+{
+	int len = bin.length();
+	bin = bin[len - 1] + bin;
+	bin.erase(len, len + 1);
+	return bin;
+}
+
+char QInt::AddBit(const char& bit1, const char& bit2, char& var_memory)
+{
+	if (bit1 == '0' && bit2 == '0')
+	{
+		if (var_memory == '0')
+		{
+			return '0';
+		}
+		else
+		{
+			var_memory = '0';
+			return '1';
+		}
+	}
+	else if (bit1 == '0' && bit2 == '1')
+	{
+		if (var_memory == '1')
+		{
+			var_memory = '1';
+			return '0';
+		}
+		else
+		{
+			var_memory = '0';
+			return '1';
+		}
+		
+	}
+	else if (bit1 == '1' && bit2 == '0')
+	{
+		if (var_memory == '1')
+		{
+			var_memory = '1';
+			return '0';
+		}
+		else
+		{
+			var_memory = '0';
+			return '1';
+		}
+	}
+	else if (bit1 == '1' && bit2 == '1')
+	{
+		if (var_memory == '0')
+		{
+			var_memory = '1';
+			return '0';
+		}
+		else
+		{
+			var_memory = '1';
+			return '1';
+		}
+	}
+}
+
+char QInt::CheckMSB(string str1, string str2)
+{
+	if (str1.length() == str2.length())
+	{
+		if (str1.length() == MAX_SIZE)
+			return '1';
+		else
+			return '0';
+	}
+	else if (str1.length() < str2.length())
+	{
+		if (str2.length() == MAX_SIZE)
+		{
+			string str = str2;
+			str = TwoComplement(str);
+			if (isSmaller(str1, str) == true)
+				return '1';
+			else
+				return '0';
+		}
+		return '0';
+		
+	}
+	else
+	{	
+		if (str1.length() == MAX_SIZE)
+		{
+			string str = str1;
+			str = TwoComplement(str);
+			if (isSmaller(str2, str) == true)
+				return '1';
+			else
+				return '0';
+		}
+		return '0';
+		
+	}
+}
+
+void Resize(string& str1, string& str2)
+{
+	while (str1.length() < str2.length())
+		str1.insert(str1.begin(), '0');
+	while (str1.length() > str2.length())
+		str2.insert(str2.begin(), '0');
+}
+
+string QInt::addBin(const string& str1, const string& str2)
+{
+	string error = "";
+	string ans;
+	string a = str1, b = str2;
+
+	char MSB = CheckMSB(a, b);
+
+	Resize(a, b);
+
+	char var_memory = '0';
+	
+	for (int i = a.length() - 1; i >= 0; i--)
+	{
+		char temp = AddBit(a[i], b[i], var_memory);
+		ans.insert(ans.begin(), temp);
+	}
+
+
+	ans = StandarString(ans);
+
+	if (MSB == '0' && ans.length() >= MAX_SIZE)
+		return error;
+	if (MSB == '1')
+		while (ans.length() > MAX_SIZE)
+			ans.erase(0, 1);
+
+	return ans;
+}
+
+string QInt::subBin(const string& str1, const string& str2)
+{
+	string a = str1, b = str2;
+
+	b = TwoComplement(b);
+	return addBin(a, b);
+}
+
+QInt QInt::operator&(const QInt& str)
+{
+	QInt ans;
+	for (int i = 0; i < 4; ++i)
+	{
+		ans.data[i] = data[i] & str.data[i];
+	}
+	return ans;
+}
+QInt QInt::operator|(const QInt& str)
+{
+	QInt ans;
+	for (int i = 0; i < 4; ++i)
+	{
+		ans.data[i] = data[i] | str.data[i];
+	}
+	return ans;
+}
+QInt QInt::operator^(const QInt& str)
+{
+	QInt ans;
+	for (int i = 0; i < 4; ++i)
+	{
+		ans.data[i] = data[i] ^ str.data[i];
+	}
+	return ans;
+}
+QInt& QInt::operator~()
+{
+	QInt ans;
+	for (int i = 0; i < 4; ++i)
+		ans.data[i] = ~data[i];
+	return ans;
+}
