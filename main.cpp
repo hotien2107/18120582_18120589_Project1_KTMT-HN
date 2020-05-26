@@ -1,4 +1,14 @@
-#include "QInt.h"
+﻿#include "QInt.h"
+
+string SAR11(const string& bin)
+{
+	string str = bin;
+
+	str.pop_back();
+	str = str[0] + str;
+
+	return str;
+}
 
 int main()
 {
@@ -61,31 +71,60 @@ int main()
 	cout << endl;
 	cout << endl;
 
-	string add = qint.addBin("101101110111000011000110110100", "1001101011001001101001011010011010100110");
-	cout << "Tong 2 so he nhi phan: \n";
-	cout << "101101110111000011000110110100\n";
-	cout << "+\n";
-	cout << "1001101011001001101001011010011010100110\n";
-	cout << "------------------------------------------------------\n";
+	string a = "-1234";
+	string a1 = "1234";
+	string b = "-56789";
+	string b1 = "5678901";
+
+	a = QInt::DecToBin(a);
+	a1 = QInt::DecToBin(a1);
+	b = QInt::DecToBin(b);
+	b1 = QInt::DecToBin(b1);
+
+	a = "0000000000000" + a;
+	string add = qint.addBin(b1, a);
+	cout << QInt::BinToDec(b1);
+	cout << " + ";
+	cout << QInt::BinToDec(a) << " = ";
+	add = qint.BinToDec(add);
 	cout << add;
 	cout << endl;
 	cout << endl;
 
-	string sub = qint.subBin("101101110111000011000110110100", "1001101011001001101001011010011010100110");
-	cout << "Hieu 2 so he nhi phan: \n";
-	cout << "               101101110111000011000110110100\n";
-	cout << "-\n";
-	cout << "1001101011001001101001011010011010100110\n";
-	cout << "------------------------------------------------------\n";
+	
+	string sub = qint.subBin(b1, a);
+	cout << QInt::BinToDec(b1);
+	cout << " - ";
+	cout << QInt::BinToDec(a) << " = ";
+	sub = qint.BinToDec(sub);
 	cout << sub;
 	cout << endl;
 	cout << endl;
 
-	string u = qint.TwoComplement("1001101011001001101001011010011010100110");
-	cout << u;
+	string mul = qint.MulBin(b1, a);
+	cout << QInt::BinToDec(b1);
+	cout << " * ";
+	cout << QInt::BinToDec(a) << " = ";
+	mul = qint.BinToDec(mul);
+	cout << mul;
+
 	cout << endl;
 	cout << endl;
 
+	string surplus;
+	string div = QInt::DivBin(b1, a, surplus);
+	cout << QInt::BinToDec(b1) ;
+	cout << " / ";
+	cout << QInt::BinToDec(a) << " = ";
+	div = qint.BinToDec(div);
+	surplus = QInt::BinToDec(surplus);
+	cout << div;
+
+	cout << endl;
+	cout << endl;
+
+	cout << endl;
+	cout << endl;
 
 	qint.BinToQInt(k);
 	cout << "Du lieu luu duoi dang block 4:\n";
@@ -93,23 +132,15 @@ int main()
 	cout << endl;
 	cout << endl;
 
-	QInt qint1(test1);
+	
 
-	qint.BinToQInt(k);
-	string Bin_qint1 = qint1.QIntToBin();
-	qint1.BinToQInt(Bin_qint1);
-
-	QInt qint2 = qint1 & qint;
-	string AndBin = qint2.QIntToBin();
-
-
-	string AndDec = qint.BinToDec(AndBin);
-
-	cout << AndBin;
 
 	cout << endl;
 	cout << endl;
 
+
+	cout << endl;
+	cout << endl;
 	
 	system("pause");
 	return 0;

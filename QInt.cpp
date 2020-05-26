@@ -42,7 +42,7 @@ char QInt::MSB(const string& Bin)
 bool QInt::OverFlowBin(const string& Bin)
 {
 	string str = Bin;
-	str = StandarString(str);
+	str = StandarBit(str);
 	if (str.length() > MAX_SIZE)
 		return false;
 	return true;
@@ -64,7 +64,7 @@ string QInt::QIntToBin()
 	return str;
 }
 
-string QInt::StandarString(const string& str)
+string QInt::StandarBit(const string& str)
 {
 	string str1 = str;
 	while (str1[0] == '0')
@@ -72,6 +72,16 @@ string QInt::StandarString(const string& str)
 		str1.erase(0, 1);
 	}
 	return str1;
+}
+
+string QInt::FullBit(const string& str)
+{
+	string bin = str;
+
+	while (bin.length() < MAX_SIZE)
+		bin = '0' + bin;
+
+	return bin;
 }
 
 QInt QInt::BinToQInt(const string& str)
@@ -112,6 +122,7 @@ QInt QInt::BinToQInt(const string& str)
 	return *this;
 }
 
+//Ham nhan mot so cho 2
 int multiply(int res[], int res_size)
 {
 
@@ -259,7 +270,7 @@ string QInt::Add(string str1, string str2)
 
 		reverse(str.begin(), str.end());
 	}
-	str = StandarString(str);
+	str = StandarBit(str);
 	return str;
 }
 
@@ -327,7 +338,7 @@ string QInt::Subtract(string str1, string str2)
 	}
 
 	reverse(str.begin(), str.end());
-	str = StandarString(str);
+	str = StandarBit(str);
 	if (flat == 1)
 	{
 		str.insert(str.begin(), '-');
@@ -337,6 +348,8 @@ string QInt::Subtract(string str1, string str2)
 
 string QInt::BinToDec(const string& str)
 {
+	if (str == "0")
+		return "0";
 	string Dec;
 	string str1 = str;
 	int k = 0;
@@ -419,7 +432,7 @@ string QInt::DecToBin(const string& str)
 			if (str1.length() == 1 && str1[0] == '1')
 			{
 				Bin.insert(Bin.begin(), '1');
-				Bin = StandarString(Bin);
+				Bin = StandarBit(Bin);
 				return Bin;
 			}
 			else
@@ -448,7 +461,7 @@ string QInt::DecToBin(const string& str)
 			{
 				Bin.insert(Bin.begin(), '1');
 				Bin = TwoComplement(Bin);
-				Bin = StandarString(Bin);
+				Bin = StandarBit(Bin);
 				return Bin;
 			}
 			else
@@ -561,7 +574,7 @@ string QInt::HexToBin(const string& str)
 		else if (str[i] == 'F')
 			Bin = Bin + "1111";
 	}
-	Bin = StandarString(Bin);
+	Bin = StandarBit(Bin);
 	return Bin;
 }
 
@@ -578,18 +591,22 @@ string QInt::HexToDec(const string& str)
 string QInt::SHL(const string& bin, int x)
 {
 	string str = bin;
-	str.erase(0, x);
+
 	for (int i = 0; i < x; ++i)
 		str += '0';
-	str = StandarString(str);
+
+	while (str.length() > 128)
+		str.erase(0, 1);
+
 	return str;
 }
 
 string QInt::SAR(const string& bin, int x)
 {
 	string str = bin;
+	str = StandarBit(str);
 
-	if (str[0] == '0')
+	if (str.length() < MAX_SIZE)
 	{
 		str.erase(str.length() - x, str.length());
 		for (int i = 0; i < x; ++i)
@@ -601,15 +618,20 @@ string QInt::SAR(const string& bin, int x)
 		for (int i = 0; i < x; ++i)
 			str = '1' + str;
 	}
-	str = StandarString(str);
+	
 	return str;
 }
 
 string QInt::ROL(string bin)
 {
 
-	bin = bin + bin[0];
+	if (bin.length() < MAX_SIZE)
+		bin += '0';
+	else
+		bin += '1';
+
 	bin.erase(0, 1);
+
 	return bin;
 }
 
@@ -617,7 +639,11 @@ string QInt::ROR(string bin)
 {
 	int len = bin.length();
 	bin = bin[len - 1] + bin;
+
 	bin.erase(len, len + 1);
+
+	bin = StandarBit(bin);
+
 	return bin;
 }
 
@@ -716,6 +742,7 @@ char QInt::CheckMSB(string str1, string str2)
 	}
 }
 
+//Ham can bang do dai cua 2 chuoi
 void Resize(string& str1, string& str2)
 {
 	while (str1.length() < str2.length())
@@ -730,6 +757,9 @@ string QInt::addBin(const string& str1, const string& str2)
 	string ans;
 	string a = str1, b = str2;
 
+	a = StandarBit(a);
+	b = StandarBit(b);
+
 	char MSB = CheckMSB(a, b);
 
 	Resize(a, b);
@@ -743,7 +773,7 @@ string QInt::addBin(const string& str1, const string& str2)
 	}
 
 
-	ans = StandarString(ans);
+	ans = StandarBit(ans);
 
 	if (MSB == '0' && ans.length() >= MAX_SIZE)
 		return error;
@@ -758,19 +788,33 @@ string QInt::subBin(const string& str1, const string& str2)
 {
 	string a = str1, b = str2;
 
+	a = StandarBit(a);
+	b = StandarBit(b);
+
 	b = TwoComplement(b);
 	return addBin(a, b);
+}
+
+QInt& QInt::operator=(const QInt& qint)
+{
+	for(int i = 0; i < MAX_SIZE; i++)
+		if (this->data[i] != NULL)
+			this->data[i] = NULL;
+	for (int i = 0; i < MAX_SIZE; i++)
+		this->data[i] = qint.data[i];
+	return *this;
 }
 
 QInt QInt::operator&(const QInt& str)
 {
 	QInt ans;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < NUM_BLOCK; i++)
 	{
-		ans.data[i] = data[i] & str.data[i];
+		ans.data[i] = this->data[i] & str.data[i];
 	}
 	return ans;
 }
+
 QInt QInt::operator|(const QInt& str)
 {
 	QInt ans;
@@ -780,6 +824,7 @@ QInt QInt::operator|(const QInt& str)
 	}
 	return ans;
 }
+
 QInt QInt::operator^(const QInt& str)
 {
 	QInt ans;
@@ -789,10 +834,176 @@ QInt QInt::operator^(const QInt& str)
 	}
 	return ans;
 }
+
 QInt& QInt::operator~()
 {
 	QInt ans;
 	for (int i = 0; i < 4; ++i)
 		ans.data[i] = ~data[i];
 	return ans;
+}
+
+//Ham dich phai so hoc cua 1 so khong gioi han so chu so
+string SAR1(const string& bin)
+{
+	string str = bin;
+
+	str.pop_back();
+	str = str[0] + str;
+
+	return str;
+}
+
+//Ham thay doi n bit dau cua chuoi 2 theo chuoi 1
+void UploadStr1ToStr2(string& str1, string& str2)
+{
+	for (int i = 0; i < str1.length(); i++)
+		str2[i] = str1[i];
+}
+
+//Ham lay ra n bit dau cua chuoi 2 dua vao chuoi 1
+void UploadStr2ToStr1(string& str1, string& str2)
+{
+	for (int i = 0; i < str1.length(); i++)
+		str1[i] = str2[i];
+}
+
+string QInt::MulBin(const string& str1, const string& str2)
+{
+	string A = "0", Q = str1, M = str2, Q1 = "0";
+	
+	Q = StandarBit(Q);
+	M = StandarBit(M);
+
+	A = FullBit(A);
+	Q = FullBit(Q);
+
+	string AQQ1 = A + Q + Q1;
+
+	int k = MAX_SIZE;
+
+	while (k > 0)
+	{
+		
+		string temp;
+		temp.push_back(AQQ1[AQQ1.length() - 2]);
+		temp.push_back(AQQ1[AQQ1.length() - 1]);
+		if (temp == "10")
+		{
+			UploadStr2ToStr1(A, AQQ1);
+			A = subBin(A, M);
+			A = FullBit(A);
+			UploadStr1ToStr2(A, AQQ1);
+		}
+		else if (temp == "01")
+		{
+			UploadStr2ToStr1(A, AQQ1);
+			A = addBin(A, M);
+			A = FullBit(A);
+			UploadStr1ToStr2(A, AQQ1);
+		}
+
+		AQQ1 = SAR1(AQQ1);
+
+		k--;
+	}
+
+	AQQ1.pop_back();
+
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		Q[i] = AQQ1[MAX_SIZE + i];
+	}
+	
+	return Q;
+}
+
+//Ham dich trai logic cua 1 so khong gioi han chu so
+string SHL1(const string& bin)
+{
+	string str = bin;
+
+	str += '0';
+	str.erase(0, 1);
+
+	return str;
+}
+
+string QInt::DivBin(const string& str1, const string& str2, string& surplus)
+{
+	string A, Q = str1, M = str2;
+
+	while (surplus.length() < MAX_SIZE)
+		surplus += '0';
+
+	Q = StandarBit(Q);
+	M = StandarBit(M);
+
+	int flag = 0;
+	
+	if (Q.length() == MAX_SIZE)
+	{
+		flag = 1;
+		Q = TwoComplement(Q);
+		Q = StandarBit(Q);
+	}
+	if (M.length() == MAX_SIZE)
+	{
+		flag = 1;
+		M = TwoComplement(M);
+		M = StandarBit(M);
+	}
+
+	bool check = isSmaller(BinToDec(Q), BinToDec(M));
+	if (check == true)
+		return "0";
+
+	while (A.length() < MAX_SIZE)
+		A += '0';
+	
+
+	int k = MAX_SIZE;
+
+	Q = FullBit(Q);
+
+	string AQ = A + Q;
+
+
+	while (k > 0)
+	{
+		AQ = SHL1(AQ);
+
+		UploadStr2ToStr1(A, AQ);
+		string A1 = subBin(A, M);
+		
+		if (A1.length() == MAX_SIZE)
+		{
+			AQ[AQ.length() - 1] = '0';
+			UploadStr1ToStr2(A, AQ);
+		}
+		else
+		{
+			A1 = FullBit(A1);
+			UploadStr1ToStr2(A1, AQ);
+			AQ[AQ.length() - 1] = '1';
+		}
+
+		k--;
+	}
+
+	UploadStr2ToStr1(surplus, AQ);
+
+	surplus = StandarBit(surplus);
+
+	for (int i = 0; i < MAX_SIZE; i++)
+	{
+		Q[i] = AQ[MAX_SIZE + i];
+	}
+
+	Q = StandarBit(Q);
+
+	if (flag == 1)
+		Q = TwoComplement(Q);
+
+	return Q;
 }
