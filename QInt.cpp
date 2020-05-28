@@ -622,29 +622,41 @@ string QInt::SAR(const string& bin, int x)
 	return str;
 }
 
-string QInt::ROL(string bin)
+string QInt::ROL(const string& bin)
 {
-
+	string str = bin;
 	if (bin.length() < MAX_SIZE)
-		bin += '0';
+		str += "0";
 	else
-		bin += '1';
+	{
+		if(str[0] == '0')
+			str += "0";
+		else
+			str += "1";
 
-	bin.erase(0, 1);
+		str.erase(0, 1);
+	}
 
-	return bin;
+	return str;
 }
 
-string QInt::ROR(string bin)
+string QInt::ROR(const string& bin)
 {
-	int len = bin.length();
-	bin = bin[len - 1] + bin;
+	string str = bin;
+	if (bin.length() < MAX_SIZE)
+	{
+		int n = MAX_SIZE - bin.length();
+		for (int i = 0; i < n; i++)
+			str = "0" + str;
+	}
+	if (str[127] == '1')
 
-	bin.erase(len, len + 1);
+		str = "1" + str;
+	else
+		str = "0" + str;
+	str.erase(128, 1);
 
-	bin = StandarBit(bin);
-
-	return bin;
+	return str;
 }
 
 char QInt::AddBit(const char& bit1, const char& bit2, char& var_memory)
@@ -797,10 +809,7 @@ string QInt::subBin(const string& str1, const string& str2)
 
 QInt& QInt::operator=(const QInt& qint)
 {
-	for(int i = 0; i < MAX_SIZE; i++)
-		if (this->data[i] != NULL)
-			this->data[i] = NULL;
-	for (int i = 0; i < MAX_SIZE; i++)
+	for (int i = 0; i < NUM_BLOCK; i++)
 		this->data[i] = qint.data[i];
 	return *this;
 }
