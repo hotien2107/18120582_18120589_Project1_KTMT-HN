@@ -60,9 +60,9 @@ public:
 //Ham dich phai so hoc
 	string SAR(const string& bin, int x);
 //Ham xoay trai cho so 128 bit
-	string ROL(string bin);
+	string ROL(const string& bin);
 //Ham xoay phai cho so 128 bit
-	string ROR(string bin);
+	string ROR(const string& bin);
 //Toan tu &
 	QInt operator&(const QInt& str);
 //Toan tu |
