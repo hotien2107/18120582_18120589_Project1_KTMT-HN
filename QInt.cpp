@@ -60,17 +60,34 @@ string QInt::QIntToBin()
 			str.insert(str.begin(), k + '0');
 			temp = temp / 2;
 		}
+		while (str.length() % 32 != 0)
+			str.insert(str.begin(), '0');
 	}
+
+	str = StandarBit(str);
 	return str;
 }
 
 string QInt::StandarBit(const string& str)
 {
 	string str1 = str;
-	while (str1[0] == '0')
+	if (str1[0] == '-')
 	{
 		str1.erase(0, 1);
+		while (str1[0] == '0')
+		{
+			str1.erase(0, 1);
+		}
+		str1.insert(str1.begin(), '-');
 	}
+	else
+	{
+		while (str1[0] == '0')
+		{
+			str1.erase(0, 1);
+		}
+	}
+
 	return str1;
 }
 
@@ -418,6 +435,9 @@ string QInt::TwoComplement(const string& str)
 		else
 			i--;
 	}
+
+	str1 = StandarBit(str1);
+
 	return str1;
 }
 
@@ -425,6 +445,9 @@ string QInt::DecToBin(const string& str)
 {
 	string Bin;
 	string str1 = str;
+
+	str1 = StandarBit(str1);
+
 	if (str1[0] != '-')
 	{
 		while (str1.length() > 0)
@@ -592,11 +615,15 @@ string QInt::SHL(const string& bin, int x)
 {
 	string str = bin;
 
-	for (int i = 0; i < x; ++i)
-		str += '0';
+	str = StandarBit(str);
 
-	while (str.length() > 128)
+	for (int i = 0; i < x; ++i)
+		str.push_back('0');
+
+	while (str.length() > MAX_SIZE)
 		str.erase(0, 1);
+
+	str = StandarBit(str);
 
 	return str;
 }
@@ -606,36 +633,44 @@ string QInt::SAR(const string& bin, int x)
 	string str = bin;
 	str = StandarBit(str);
 
+	if (str.length() < MAX_SIZE && str.length() < x)
+	{
+		return "0";
+	}
+
 	if (str.length() < MAX_SIZE)
 	{
 		str.erase(str.length() - x, str.length());
-		for (int i = 0; i < x; ++i)
-			str = '0' + str;
 	}
 	else
 	{
-		str.erase(str.length() - x, str.length());
 		for (int i = 0; i < x; ++i)
 			str = '1' + str;
+		str.erase(str.length() - x, str.length());
+		
 	}
-	
+
+	str = StandarBit(str);
+
+	if (str.length() == 0)
+		return "0";
+
 	return str;
 }
 
 string QInt::ROL(const string& bin)
 {
 	string str = bin;
-	if (bin.length() < MAX_SIZE)
+	str = FullBit(str);
+
+	if (str[0] == '0')
 		str += "0";
 	else
-	{
-		if(str[0] == '0')
-			str += "0";
-		else
-			str += "1";
+		str += "1";
 
-		str.erase(0, 1);
-	}
+	str.erase(0, 1);
+
+	str = StandarBit(str);
 
 	return str;
 }
@@ -643,18 +678,16 @@ string QInt::ROL(const string& bin)
 string QInt::ROR(const string& bin)
 {
 	string str = bin;
-	if (bin.length() < MAX_SIZE)
-	{
-		int n = MAX_SIZE - bin.length();
-		for (int i = 0; i < n; i++)
-			str = "0" + str;
-	}
-	if (str[127] == '1')
+	str = FullBit(str);
 
+	if (str[str.length() - 1] == '1')
 		str = "1" + str;
 	else
 		str = "0" + str;
-	str.erase(128, 1);
+
+	str.erase(str.length() - 1, 1);
+
+	str = StandarBit(str);
 
 	return str;
 }
@@ -685,7 +718,7 @@ char QInt::AddBit(const char& bit1, const char& bit2, char& var_memory)
 			var_memory = '0';
 			return '1';
 		}
-		
+
 	}
 	else if (bit1 == '1' && bit2 == '0')
 	{
@@ -736,10 +769,10 @@ char QInt::CheckMSB(string str1, string str2)
 				return '0';
 		}
 		return '0';
-		
+
 	}
 	else
-	{	
+	{
 		if (str1.length() == MAX_SIZE)
 		{
 			string str = str1;
@@ -750,7 +783,7 @@ char QInt::CheckMSB(string str1, string str2)
 				return '0';
 		}
 		return '0';
-		
+
 	}
 }
 
@@ -771,24 +804,32 @@ string QInt::addBin(const string& str1, const string& str2)
 
 	a = StandarBit(a);
 	b = StandarBit(b);
+	int flag = -1;
+	if (a.length() == MAX_SIZE && b.length() == MAX_SIZE)
+		flag = 1;
+	else if (a.length() < MAX_SIZE && b.length() < MAX_SIZE)
+		flag = 0;
 
 	char MSB = CheckMSB(a, b);
 
 	Resize(a, b);
 
 	char var_memory = '0';
-	
+
 	for (int i = a.length() - 1; i >= 0; i--)
 	{
 		char temp = AddBit(a[i], b[i], var_memory);
 		ans.insert(ans.begin(), temp);
 	}
 
-
 	ans = StandarBit(ans);
-
-	if (MSB == '0' && ans.length() >= MAX_SIZE)
+	
+	if (flag == 1 && ans.length() < MAX_SIZE)
 		return error;
+
+	if (flag == 0 && ans.length() == MAX_SIZE)
+		return error;
+
 	if (MSB == '1')
 		while (ans.length() > MAX_SIZE)
 			ans.erase(0, 1);
@@ -829,7 +870,7 @@ QInt QInt::operator|(const QInt& str)
 	QInt ans;
 	for (int i = 0; i < 4; ++i)
 	{
-		ans.data[i] = data[i] | str.data[i];
+		ans.data[i] = this->data[i] | str.data[i];
 	}
 	return ans;
 }
@@ -839,16 +880,19 @@ QInt QInt::operator^(const QInt& str)
 	QInt ans;
 	for (int i = 0; i < 4; ++i)
 	{
-		ans.data[i] = data[i] ^ str.data[i];
+		ans.data[i] = this->data[i] ^ str.data[i];
 	}
 	return ans;
 }
 
-QInt& QInt::operator~()
+QInt QInt::operator~()
 {
+	QInt temp = *this;
+
 	QInt ans;
 	for (int i = 0; i < 4; ++i)
-		ans.data[i] = ~data[i];
+		ans.data[i] = ~temp.data[i];
+
 	return ans;
 }
 
@@ -880,9 +924,20 @@ void UploadStr2ToStr1(string& str1, string& str2)
 string QInt::MulBin(const string& str1, const string& str2)
 {
 	string A = "0", Q = str1, M = str2, Q1 = "0";
-	
+	string error = "";
+	int flag = -1;
+
 	Q = StandarBit(Q);
 	M = StandarBit(M);
+
+	if (Q.length() < MAX_SIZE && M.length() < MAX_SIZE)
+		flag = 0;
+	else if (Q.length() < MAX_SIZE && M.length() == MAX_SIZE)
+		flag = 1;
+	else if (Q.length() == MAX_SIZE && M.length() < MAX_SIZE)
+		flag = 2;
+	else if (Q.length() == MAX_SIZE && M.length() == MAX_SIZE)
+		flag = 3;
 
 	A = FullBit(A);
 	Q = FullBit(Q);
@@ -893,7 +948,7 @@ string QInt::MulBin(const string& str1, const string& str2)
 
 	while (k > 0)
 	{
-		
+
 		string temp;
 		temp.push_back(AQQ1[AQQ1.length() - 2]);
 		temp.push_back(AQQ1[AQQ1.length() - 1]);
@@ -923,7 +978,45 @@ string QInt::MulBin(const string& str1, const string& str2)
 	{
 		Q[i] = AQQ1[MAX_SIZE + i];
 	}
-	
+
+	Q = StandarBit(Q);
+
+	if (flag == 0)
+	{
+		if (Q.length() == MAX_SIZE)
+			return error;
+		
+		if (isSmaller(Q, str1) == true || isSmaller(Q, str2) == true)
+			return error;
+	}
+
+	if (flag == 1)
+	{
+		if (Q.length() < MAX_SIZE)
+			return error;
+
+		if (isSmaller(TwoComplement(Q), str1) == true || isSmaller(TwoComplement(Q), TwoComplement(str2)) == true)
+			return error;
+	}
+
+	if (flag == 2)
+	{
+		if (Q.length() < MAX_SIZE)
+			return error;
+
+		if (isSmaller(TwoComplement(Q), TwoComplement(str1)) == true || isSmaller(TwoComplement(Q), str2) == true)
+			return error;
+	}
+
+	if (flag == 2)
+	{
+		if (Q.length() == MAX_SIZE)
+			return error;
+
+		if (isSmaller(Q, TwoComplement(str1)) == true || isSmaller(Q, TwoComplement(str2)) == true)
+			return error;
+	}
+
 	return Q;
 }
 
@@ -938,27 +1031,32 @@ string SHL1(const string& bin)
 	return str;
 }
 
-string QInt::DivBin(const string& str1, const string& str2, string& surplus)
+string QInt::DivBin(const string& str1, const string& str2)
 {
 	string A, Q = str1, M = str2;
-
-	while (surplus.length() < MAX_SIZE)
-		surplus += '0';
 
 	Q = StandarBit(Q);
 	M = StandarBit(M);
 
 	int flag = 0;
-	
-	if (Q.length() == MAX_SIZE)
+
+	if (Q.length() == MAX_SIZE  && M.length() < MAX_SIZE)
 	{
 		flag = 1;
 		Q = TwoComplement(Q);
 		Q = StandarBit(Q);
 	}
-	if (M.length() == MAX_SIZE)
+	else if (M.length() == MAX_SIZE && Q.length() < MAX_SIZE)
 	{
 		flag = 1;
+		M = TwoComplement(M);
+		M = StandarBit(M);
+	}
+	else if (M.length() == MAX_SIZE && Q.length() == MAX_SIZE)
+	{
+		flag = 2;
+		Q = TwoComplement(Q);
+		Q = StandarBit(Q);
 		M = TwoComplement(M);
 		M = StandarBit(M);
 	}
@@ -969,7 +1067,7 @@ string QInt::DivBin(const string& str1, const string& str2, string& surplus)
 
 	while (A.length() < MAX_SIZE)
 		A += '0';
-	
+
 
 	int k = MAX_SIZE;
 
@@ -984,7 +1082,7 @@ string QInt::DivBin(const string& str1, const string& str2, string& surplus)
 
 		UploadStr2ToStr1(A, AQ);
 		string A1 = subBin(A, M);
-		
+
 		if (A1.length() == MAX_SIZE)
 		{
 			AQ[AQ.length() - 1] = '0';
@@ -999,10 +1097,6 @@ string QInt::DivBin(const string& str1, const string& str2, string& surplus)
 
 		k--;
 	}
-
-	UploadStr2ToStr1(surplus, AQ);
-
-	surplus = StandarBit(surplus);
 
 	for (int i = 0; i < MAX_SIZE; i++)
 	{

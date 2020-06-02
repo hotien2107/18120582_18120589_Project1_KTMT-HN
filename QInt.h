@@ -10,6 +10,7 @@
 #include <vector>
 #include <sstream>
 #include <math.h>
+#include <fstream>
 
 
 using namespace std;
@@ -33,7 +34,6 @@ public:
 public:
 
 	void PrintData();
-	void ReadData();
 
 public:
 //Ham chuyen Qint sang Bin
@@ -56,11 +56,11 @@ public:
 public:
 
 //Ham dich trai lpgic
-	string SHL(const string& bin, int x);
+	static string SHL(const string& bin, int x);
 //Ham dich phai so hoc
-	string SAR(const string& bin, int x);
+	static string SAR(const string& bin, int x);
 //Ham xoay trai cho so 128 bit
-	string ROL(const string& bin);
+	static string ROL(const string& bin);
 //Ham xoay phai cho so 128 bit
 	string ROR(const string& bin);
 //Toan tu &
@@ -70,7 +70,7 @@ public:
 //Toan tu ^
 	QInt operator^(const QInt& str);
 //Toan tu ~
-	QInt& operator~();
+	QInt operator~();
 //Toan tu  gan =
 	QInt& operator=(const QInt& qint);
 
@@ -83,7 +83,7 @@ public:
 	static string MulBin(const string& str1, const string& str2);
 //Ham chia hai so Bin
 //Chi co so du khi 2 so deu lon hon 0 va so dau lon hon so thu hai
-	static string DivBin(const string& str1, const string& str2, string& surplus);
+	static string DivBin(const string& str1, const string& str2);
 
 	
 public:

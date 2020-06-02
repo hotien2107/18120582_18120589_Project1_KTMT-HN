@@ -13,8 +13,9 @@ int Count(string temp)
 }
 
 //Xu ly khi co 3 doi so
-string BT1(string a, string b,string c)
+string BT1(string a, string b, string c)
 {
+	c = QInt::StandarBit(c);
 
 	if (a == "2")
 	{
@@ -34,7 +35,7 @@ string BT1(string a, string b,string c)
 		else
 		{
 			QInt q;
-			q = q.BinToQInt(c);
+			q.BinToQInt(c);
 			if (b == "~")
 			{
 				q = ~q;
@@ -65,7 +66,7 @@ string BT1(string a, string b,string c)
 		{
 			string d = QInt::HexToBin(c);
 			QInt q;
-			q = q.BinToQInt(d);
+			q.BinToQInt(d);
 			if (b == "~")
 			{
 				q = ~q;
@@ -98,7 +99,7 @@ string BT1(string a, string b,string c)
 		{
 			string d  = QInt::DecToBin(c);
 			QInt q;
-			q = q.BinToQInt(d);
+			q.BinToQInt(d);
 			if (b == "~")
 			{
 				q = ~q;
@@ -131,16 +132,17 @@ string BT2(string a, string b, string c, string d)
 				return q.MulBin(b, d);
 			if (c == "/")
 			{
-				string sd;
-				return q.DivBin(b, d, sd);
+				return q.DivBin(b, d);
 			}
 		}
 		else
 		{
-			QInt q1 = q1.BinToQInt(b);
+			QInt q1;
+			q1.BinToQInt(b);
 			if (c == "&" || c == "|" || c == "^")
 			{
-				QInt q2 = q2.BinToQInt(d);
+				QInt q2;
+				q2.BinToQInt(d);
 				if (c == "&")
 				{
 					q = q1 & q2;
@@ -187,13 +189,13 @@ string BT2(string a, string b, string c, string d)
 			}
 			if (c == "/")
 			{
-				string sd;
-				return q.BinToDec(q.DivBin(b, d, sd));
+				return q.BinToDec(q.DivBin(b, d));
 			}
 		}
 		else
 		{
-			QInt q1 = q1.BinToQInt(b);
+			QInt q1;
+			q1.BinToQInt(b);
 			if (c == "&" || c == "|" || c == "^")
 			{
 				d = QInt::DecToBin(d);
@@ -242,17 +244,18 @@ string BT2(string a, string b, string c, string d)
 				return q.BinToHex(q.MulBin(b, d));
 			if (c == "/")
 			{
-				string sd;
-				return q.BinToHex(q.DivBin(b, d, sd));
+				return q.BinToHex(q.DivBin(b, d));
 			}
 		}
 		else
 		{
-			QInt q1 = q1.BinToQInt(b);
+			QInt q1;
+			q1.BinToQInt(b);
 			if (c == "&" || c == "|" || c == "^")
 			{
 				d = QInt::HexToBin(d);
-				QInt q2 = q2.BinToQInt(d);
+				QInt q2;
+				q2.BinToQInt(d);
 				if (c == "&")
 				{
 					q = q1 & q2;
@@ -324,7 +327,7 @@ void RWFile(string input, string output)
 					index1 = temp.find_first_of(' ', index);
 					s3 = temp.substr(index, index1 - index);
 
-					k = Format1(s1, s2, s3);		//Goi den ham thuc thi phep tinh
+					k = BT1(s1, s2, s3);		//Goi den ham thuc thi phep tinh
 					outfile << k << endl;		//Ghi ket qua vao file
 				}
 
@@ -346,7 +349,7 @@ void RWFile(string input, string output)
 						index = index1 + 1;
 						index1 = temp.find_first_of(' ', index);
 						s4 = temp.substr(index, index1 - index);
-						k = Format2(s1, s2, s3, s4);		//Goi den ham thuc thi phep tinh
+						k = BT2(s1, s2, s3, s4);		//Goi den ham thuc thi phep tinh
 						outfile << k << endl;		//Ghi ket qua vao file
 					}
 				}

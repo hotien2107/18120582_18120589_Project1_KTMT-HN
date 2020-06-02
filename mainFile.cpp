@@ -1,19 +1,11 @@
-#include "File.h"
+﻿#include "File.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-	string input;
-	string output;
-	
-	cout << "\nEnter name's input: ";
-	getline(cin, input);
-
-	cout << "\nEnter name's outfile: ";
-	getline(cin, output);
+	string input = "input.txt";
+	string output = "output.txt";
 	
 	RWFile(input, output);
 
-
-	system("pause");
 	return 0;
 }
