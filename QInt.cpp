@@ -1008,7 +1008,7 @@ string QInt::MulBin(const string& str1, const string& str2)
 			return error;
 	}
 
-	if (flag == 2)
+	if (flag == 3)
 	{
 		if (Q.length() == MAX_SIZE)
 			return error;
